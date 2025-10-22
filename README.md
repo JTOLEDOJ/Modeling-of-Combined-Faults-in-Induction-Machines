@@ -1,7 +1,5 @@
 # Instructions for Understanding the Code Tree of the Paper Titled "Modeling of Three-Phase Induction Machines Under Combined Inter-Turn Fault and Mechanical Eccentricity"
 
-## NOTE: The code will be made available upon the acceptance of the paper for publication. This is to ensure compliance with the agreement signed by the authors, which guarantees that the work, or any part of it, has not been previously published elsewhere.
-
 ### Modification of the Meeker (2004) design
 Files in the "desenhos" folder
 
