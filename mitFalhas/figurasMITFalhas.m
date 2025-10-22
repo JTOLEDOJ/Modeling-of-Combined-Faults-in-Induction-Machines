@@ -1,0 +1,213 @@
+close all
+clc
+
+% Intervalo de análise
+idx0_falhas = round((tSaiCarga - 5/f)/dt_decimado);
+idx1_falhas = idx0_falhas + round(1/f/dt_decimado);
+idx_falhas_vetor = idx0_falhas:idx1_falhas;
+idx_falhas_tam = length(idx_falhas_vetor);
+
+% Velocidade mecânica vs. tempo
+figure;
+plot(tempo,nmec_falhas,'-k',...
+    tempo(idx_falhas_vetor),...
+    mean(nmec_falhas(idx_falhas_vetor))*ones(1,idx_falhas_tam),'-.r',...
+    tempo,nmec_saud,'-b',...
+    tempo(idx0_falhas),nmec_falhas(idx0_falhas),'*r',...
+    tempo(idx1_falhas),nmec_falhas(idx1_falhas),'*r',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Velocidade mecânica [rpm]');
+ylim([-0.01 1.1]*(120*f/p));
+legend({'Falha','Falha (Média)','Saudável'},'Location','southeast');
+grid on;
+
+% Torque eletromagnético vs. tempo
+[~, idx_TeMax_falhas] = max(Te_falhas(idx_falhas_vetor));
+idx_TeMax_falhas = idx0_falhas + idx_TeMax_falhas - 1;
+figure;
+plot(tempo,Te_falhas,'-k',...
+    tempo(idx_falhas_vetor),...
+    mean(Te_falhas(idx_falhas_vetor))*ones(1,idx_falhas_tam),'-.r',...
+    tempo,Te_saud,'-b',...
+    tempo(idx0_falhas),Te_falhas(idx0_falhas),'*r',...
+    tempo(idx1_falhas),Te_falhas(idx1_falhas),'*r',...
+    tempo(idx_TeMax_falhas),Te_falhas(idx_TeMax_falhas),'*k',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Torque eletromagnético [N.m]');
+ylim([-0.01 2]*TeMax);
+legend({'Falha','Falha (Média)','Saudável'});
+grid on;
+
+% Potência mecânica vs. tempo
+figure;
+plot(tempo,Pmec_falhas,'-k',...
+    tempo(idx_falhas_vetor),...
+    mean(Pmec_falhas(idx_falhas_vetor))*ones(1,idx_falhas_tam),'-.r',...
+    tempo,Pmec_saud,'-b',...
+    tempo(idx0_falhas),Pmec_falhas(idx0_falhas),'*r',...
+    tempo(idx1_falhas),Pmec_falhas(idx1_falhas),'*r',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Potência mecânica [W]');
+ylim([-0.01 1]*(TeMax/TeNom)*Pnom);
+legend({'Falha','Falha (Média)','Saudável'});
+grid on;
+
+% Corrente de estator em dq vs. tempo
+[~, idx_isMax_dq_falhas] = max(is_dq_falhas(idx_falhas_vetor));
+idx_isMax_dq_falhas = idx0_falhas + idx_isMax_dq_falhas - 1;
+figure;
+plot(tempo,is_dq_falhas,'-k',...
+    tempo(idx_falhas_vetor),...
+    mean(is_dq_falhas(idx_falhas_vetor))*ones(1,idx_falhas_tam),'-.r',...
+    tempo,is_dq_saud,'-b',...
+    tempo(idx0_falhas),is_dq_falhas(idx0_falhas),'*r',...
+    tempo(idx1_falhas),is_dq_falhas(idx1_falhas),'*r',...
+    tempo(idx_isMax_dq_falhas),is_dq_falhas(idx_isMax_dq_falhas),'*k',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Corrente de estator em dq (Linha-RMS) [A]');
+ylim([-0.01 1.1]*Ip_In*Inom);
+legend({'Falha','Falha (Média)','Saudável'});
+grid on;
+
+% Correntes de estator em abc vs. tempo
+[~, idx_iasMax_falhas] = max(ias_falhas(idx_falhas_vetor));
+idx_iasMax_falhas = idx0_falhas + idx_iasMax_falhas - 1;
+[~, idx_ibsMax_falhas] = max(ibs_falhas(idx_falhas_vetor));
+idx_ibsMax_falhas = idx0_falhas + idx_ibsMax_falhas - 1;
+[~, idx_icsMax_falhas] = max(ics_falhas(idx_falhas_vetor));
+idx_icsMax_falhas = idx0_falhas + idx_icsMax_falhas - 1;
+figure;
+plot(tempo,ias_falhas,'-r',tempo,ibs_falhas,'-g',...
+    tempo,ics_falhas,'-b',tempo,ias_saud,'--r',...
+    tempo,ibs_saud,'--g',tempo,ics_saud,'--b',...
+    tempo(idx0_falhas),ias_falhas(idx0_falhas),'*r',...
+    tempo(idx0_falhas),ibs_falhas(idx0_falhas),'*g',...
+    tempo(idx0_falhas),ics_falhas(idx0_falhas),'*b',...
+    tempo(idx1_falhas),ias_falhas(idx1_falhas),'*r',...
+    tempo(idx1_falhas),ibs_falhas(idx1_falhas),'*g',...
+    tempo(idx1_falhas),ics_falhas(idx1_falhas),'*b',...
+    tempo(idx_iasMax_falhas),ias_falhas(idx_iasMax_falhas),'*k',...
+    tempo(idx_ibsMax_falhas),ibs_falhas(idx_ibsMax_falhas),'*k',...
+    tempo(idx_icsMax_falhas),ics_falhas(idx_icsMax_falhas),'*k',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Correntes de Estator em abc (Fase-Pico) [A]');
+ylim([-1.1 1.1]*Ip_In*Inom*sqrt(2)/sqrt(3));
+legend({'ias (Falha)','ibs (Falha)','ics (Falha)',...
+    'ias (Saudável)','ibs (Saudável)','ics (Saudável)'});
+grid on;
+
+% Correntes de rotor em abc vs. tempo
+figure;
+plot(tempo,iar_falhas*(Ns/Nr),'-r',tempo,ibr_falhas*(Ns/Nr),'-g',...
+    tempo,icr_falhas*(Ns/Nr),'-b',tempo,iar_saud*(Ns/Nr),'--r',...
+    tempo,ibr_saud*(Ns/Nr),'--g',tempo,icr_saud*(Ns/Nr),'--b',...
+    tempo(idx0_falhas),iar_falhas(idx0_falhas)*(Ns/Nr),'*r',...
+    tempo(idx0_falhas),ibr_falhas(idx0_falhas)*(Ns/Nr),'*g',...
+    tempo(idx0_falhas),icr_falhas(idx0_falhas)*(Ns/Nr),'*b',...
+    tempo(idx1_falhas),iar_falhas(idx1_falhas)*(Ns/Nr),'*r',...
+    tempo(idx1_falhas),ibr_falhas(idx1_falhas)*(Ns/Nr),'*g',...
+    tempo(idx1_falhas),icr_falhas(idx1_falhas)*(Ns/Nr),'*b',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+ylabel('Correntes de Rotor em abc (Fase-Pico, Medidas no Rotor) [A]');
+ylim([-1.1 1.1]*Ip_In*Inom*sqrt(2)/sqrt(3));
+legend({'iar^{\prime} (Falha)','ibr^{\prime} (Falha)',...
+    'icr^{\prime} (Falha)','iar^{\prime} (Saudável)',...
+    'ibr^{\prime} (Saudável)','icr^{\prime} (Saudável)'});
+grid on;
+
+% Variáveis da falha entre espiras vs. tempo
+[~, idx_ifMax_falhas] = max(if_falhas(idx_falhas_vetor));
+idx_ifMax_falhas = idx0_falhas + idx_ifMax_falhas - 1;
+[~, idx_vasfMax_falhas] = max(vasf_falhas(idx_falhas_vetor));
+idx_vasfMax_falhas = idx0_falhas + idx_vasfMax_falhas - 1;
+
+figure;
+subplot(2,2,1);
+plot(tempo,ias_falhas,'-r',tempo,ias_falhas - if_falhas,'--r',...
+    tempo,if_falhas,'-k',...
+    tempo(idx_ifMax_falhas),if_falhas(idx_ifMax_falhas),'*k',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+xlim([tempo(idx0_falhas-round(1/f/dt_decimado))...
+    tempo(idx1_falhas+round(1/f/dt_decimado))]);
+ylabel('Correntes da fase as em abc [A]');
+ylim([-1.2 1.2]*Ip_In*Inom*sqrt(2)/sqrt(3));
+legend({'i\_as = i\_ash','i\_asf','i\_f'});
+grid on;
+
+subplot(2,2,3);
+plot(tempo,vas_falhas,'-r',tempo,vas_falhas - vasf_falhas,'--r',...
+    tempo,vasf_falhas,'-k',...
+    tempo(idx_vasfMax_falhas),vasf_falhas(idx_vasfMax_falhas),'*k',...
+    'LineWidth',lineWidth);
+xlabel('Tempo [s]');
+xlim([tempo(idx0_falhas-round(1/f/dt_decimado))...
+    tempo(idx1_falhas+round(1/f/dt_decimado))]);
+ylabel('Tensões da fase as em abc [V]');
+ylim([-1.1 1.1]*Vmax);
+legend({'v\_as(t)','v\_ash(t)','v\_asf(t)'});
+grid on;
+
+subplot(2,2,2);
+plot(tempo,xi_falhas*100,'-k','LineWidth',lineWidth);
+xlabel('Tempo [s]');
+xlim([tEntraCurto-2/f tEntraCurto+sum(tDuracaoCurto)+2/f]);
+ylabel('Espiras em curto [%]');
+ylim([-1 1.2*max(xi_ref*100)]);
+grid on;
+
+subplot(2,2,4);
+plot(tempo,rf_falhas,'-k','LineWidth',lineWidth);
+xlabel('Tempo [s]');
+xlim([tEntraCurto-2/f tEntraCurto+sum(tDuracaoCurto)+2/f]);
+ylabel('Resistência de curto [Ohm]');
+ylim([-1 1.2*max(rf_ref)]);
+grid on;
+
+% Variáveis da falha de excentricidade vs. tempo
+figure;
+subplot(2,2,1);
+plot(tempo,est_falhas,'-r',tempo,ed_falhas,'-b',...
+    tempo,er_falhas,'-k','LineWidth',lineWidth);
+xlabel('Tempo [s]');
+xlim([tEntraEst-2/f tEntraCurto]);
+ylabel('Amplitude das excentricidades [mm]');
+ylim([-0.1*g 1.2*(est_ref+ed_ref)]);
+legend({'Estática','Dinâmica','Mista'});
+grid on;
+
+subplot(2,2,2);
+plot(tempo,delta_st_falhas*180/pi,'-r',tempo,delta_d_falhas*180/pi,'-b',...
+    tempo,delta_r_falhas*180/pi,'-k','LineWidth',lineWidth);
+if ~isnan(tEfetivoEntraEd_falhas) && ed_ref == 0
+    hold on;
+    plot(tEfetivoEntraEd_falhas,...
+        delta_r_falhas(tEfetivoEntraEd_falhas/dt)*180/pi,'*r',...
+        'LineWidth',lineWidth);
+end
+xlabel('Tempo [s]');
+xlim([tEntraEst-2/f tEntraCurto]);
+ylabel('Ângulo das excentricidades [grau]');
+legend({'Estática','Dinâmica','Mista'});
+grid on;
+
+subplot(2,2,[3 4]);
+plot(tempo,delta_d_falhas - delta_st_falhas,'-k',...
+    'LineWidth',lineWidth);
+if isnan(tEfetivoEntraEd_falhas) || ed_ref == 0
+    xlim([tEntraEd-2/f tEntraCurto]);
+else
+    hold on;
+    plot(tEfetivoEntraEd_falhas,erroEfetivoSincEd_falhas,'*r',...
+        'LineWidth',lineWidth);
+    xlim([tEntraEd-2/f tEfetivoEntraEd_falhas+2/f]);
+end
+xlabel('Tempo [s]');
+ylabel('Erro de sincronização [rad]');
+grid on;
